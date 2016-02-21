@@ -51,10 +51,10 @@ showRepoInternalDirectories pathToRepo =
         pathToInfo = getPathToInfo pathToRepo
     in
     concat [pathToBranches
-            ,"\n", pathToHooks 
-            ,"\n", pathToLogs 
-            ,"\n", pathToObjects 
-            ,"\n", pathToRefs 
+            ,"\n", pathToHooks
+            ,"\n", pathToLogs
+            ,"\n", pathToObjects
+            ,"\n", pathToRefs
             ,"\n", pathToInfo]
 
 main :: IO ()
@@ -87,7 +87,7 @@ Info: /Users/dshevchenko/repo1/.git/info
 Вот что представляет собою тип `ReaderT`:
 
 ```haskell
-newtype ReaderT r m a 
+newtype ReaderT r m a
 ```
 
 Перед нами конструктор типа, параметризованный тремя значениями:
@@ -139,7 +139,7 @@ getStringFromUser = do
 В этом и заключается маленькое волшебство `ReaderT`: общее значение уже не нужно явно передавать в виде аргумента, поскольку оно как бы незримо парит в воздухе, и теперь все наши функции могут запрашивать его с помощью функции `ask`. И поэтому теперь функция `showRepoInternalDirectories` выглядит так:
 
 ```haskell
-showRepoInternalDirectories :: PathReader 
+showRepoInternalDirectories :: PathReader
 showRepoInternalDirectories = do
     pathToBranches <- getPathToBranches
     pathToHooks <- getPathToHooks
@@ -148,10 +148,10 @@ showRepoInternalDirectories = do
     pathToRefs <- getPathToRefs
     pathToInfo <- getPathToInfo
     return $ concat [pathToBranches
-                     ,"\n", pathToHooks 
-                     ,"\n", pathToLogs 
-                     ,"\n", pathToObjects 
-                     ,"\n", pathToRefs 
+                     ,"\n", pathToHooks
+                     ,"\n", pathToLogs
+                     ,"\n", pathToObjects
+                     ,"\n", pathToRefs
                      ,"\n", pathToInfo]
 ```
 
@@ -164,12 +164,12 @@ main :: IO ()
 main = do
     pathToRepo <- readFile "/Users/dshevchenko/my.conf"
     let pathWithoutTrailingNL = takeWhile (/= '\n') pathToRepo
-    finalInfo <- runReaderT showRepoDirectories 
+    finalInfo <- runReaderT showRepoInternalDirectories
                             pathWithoutTrailingNL
     putStrLn finalInfo
 ```
 
-Функция `runReaderT` - это волшебная палочка, запускающая (англ. "run") вышеупомянутую магию. Принимая в качестве первого аргумента функцию `showRepoDirectories`, а качестве второго - тот самый путь из конфигурационного файла, функция `runReaderT` создаёт общую среду, с которой и работают все наши функции. Грубо говоря, `runReaderT` создаёт облако и помещает в него значение `pathWithoutTrailingNL`. Вот такие "облачные технологии" внутри Haskell... :-)
+Функция `runReaderT` - это волшебная палочка, запускающая (англ. "run") вышеупомянутую магию. Принимая в качестве первого аргумента функцию `showRepoInternalDirectories`, а качестве второго - тот самый путь из конфигурационного файла, функция `runReaderT` создаёт общую среду, с которой и работают все наши функции. Грубо говоря, `runReaderT` создаёт облако и помещает в него значение `pathWithoutTrailingNL`. Вот такие "облачные технологии" внутри Haskell... :-)
 
 ## Разоблачение монады Reader
 
@@ -227,8 +227,8 @@ main :: IO ()
 main = do
     pathToRepo <- readFile "/Users/dshevchenko/my.conf"
     let pathWithoutTrailingNL = takeWhile (/= '\n') pathToRepo
-        -- runReader сразу вернёт String, а не IO String... 
-        finalInfo = runReader showRepoInternalDirectories 
+        -- runReader сразу вернёт String, а не IO String...
+        finalInfo = runReader showRepoInternalDirectories
                               pathWithoutTrailingNL
     putStrLn finalInfo
 ```
